@@ -4,6 +4,8 @@
 
 namespace ion::engine
 {
+	class Game;
+
 	class Engine
 	{
 	private:
@@ -19,10 +21,11 @@ namespace ion::engine
 			return instance_;
 		}
 		
+		template<typename Game>
 		static inline const Engine& initialize() noexcept
 		{
 			auto& engine = getMutable();
-			engine.onInitialize();
+			engine.onInitialize(new Game());
 			engine.isInitialized_ = true;
 			return engine;
 		}
@@ -41,11 +44,15 @@ namespace ion::engine
 		Engine(Engine&&) = delete;
 		~Engine();
 
-		void onInitialize() noexcept;
+		void onInitialize(Game* game) noexcept;
 		void onTerminate() noexcept;
 
+	public:
+		void run() const;
+		inline Game& game() const noexcept { assert(game_ != nullptr); return *game_; }
 
 	private:
+		Game* game_;
 		bool isInitialized_;
 	};
 }

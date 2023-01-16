@@ -27,7 +27,7 @@ namespace ion::engine
 	
 	namespace SubSystemRegistry
 	{
-		void terminate()
+		inline void terminate()
 		{
 			while(SubSystemBase::terminateCallbacks_.size() > 0)
 			{
@@ -73,6 +73,7 @@ namespace ion::engine
 			printf("SubSystem<%s>::terminate()\n", name);
 			
 			T::instance_->onTerminate();
+			delete T::instance_;
 			T::instance_ = nullptr;
 		}
 
