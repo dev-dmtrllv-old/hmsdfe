@@ -2,9 +2,21 @@
 
 namespace ion::tasky::scheduler
 {
-	bool stealNext(TaskPtr& ptr)
+	std::vector<Executor*> Executor::executors_;
+
+	bool Executor::stealTask(TaskPtr& task)
 	{
-		// TODO: steal from other queue :D
+		const auto l = executors_.size();
+		for (std::size_t i = 0; i < l; i++)
+		{
+			const auto index = stealIndex_++ % l;
+			if (index != exectorIndex_)
+			{
+				task = executors_.at(index)->queue_.pop();
+				if (task != nullptr)
+					return true;
+			}
+		}
 		return false;
 	}
 
@@ -12,9 +24,9 @@ namespace ion::tasky::scheduler
 	{
 		TaskPtr ptr = queue_.pop();
 
-		if(ptr == nullptr && !stealNext(ptr))
+		if (ptr == nullptr && !stealTask(ptr))
 			return false;
-		
+
 		if (ptr != nullptr)
 		{
 			auto handle = std::coroutine_handle<TaskPromiseBase>::from_address(ptr);
@@ -69,7 +81,7 @@ namespace ion::tasky::scheduler
 				handle.destroy();
 			}
 		}
-		
+
 		return true;
 	}
 }

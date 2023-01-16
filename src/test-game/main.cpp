@@ -1,25 +1,13 @@
-#include "tasky/TaskScheduler.hpp"
-
-using namespace ion::tasky;
-
-Task<> test()
-{
-	puts("test()");
-	co_return;
-}
+#include "pch.hpp"
+#include "engine/Engine.hpp"
 
 int main()
 {
-	scheduler::schedule(test(), test(), test(), test(), test(), test(), test(), test(), test(), test());
+	using namespace ion::engine;
 
-	std::thread t([]
-	{
-		scheduler::schedule(test(), test(), test(), test(), test(), test(), test(), test(), test(), test());
-		while(scheduler::executor().runNext()) {}
-	});
+	const Engine& engine = Engine::initialize();
 	
-	while(scheduler::executor().runNext()) {}
-	
-	t.join();
+	Engine::terminate();
+
 	return 0;
 }

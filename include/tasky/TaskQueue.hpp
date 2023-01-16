@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <mutex>
+#include <deque>
 
 namespace ion::tasky
 {
@@ -22,7 +23,7 @@ namespace ion::tasky
 		inline void push(void* task)
 		{
 			std::unique_lock lk(mutex_);
-			tasks_.push(task);
+			tasks_.emplace_back(task);
 		}
 
 		[[nodiscard]] inline void* pop()
@@ -32,14 +33,26 @@ namespace ion::tasky
 			if(tasks_.size() == 0)
 				return nullptr;
 
+			void* ptr = tasks_.back();
+			tasks_.pop_back();
+			return ptr;
+		}
+
+		[[nodiscard]] inline void* steal()
+		{
+			std::unique_lock lk(mutex_);
+			
+			if(tasks_.size() == 0)
+				return nullptr;
+
 			void* ptr = tasks_.front();
-			tasks_.pop();
+			tasks_.pop_front();
 			return ptr;
 		}
 
 	private:
 		std::atomic<std::size_t> tasksCount_;
-		std::queue<void*> tasks_;
+		std::deque<void*> tasks_;
 		std::mutex mutex_;
 	};
 }

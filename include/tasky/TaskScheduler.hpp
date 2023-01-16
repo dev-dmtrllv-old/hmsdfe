@@ -12,14 +12,23 @@ namespace ion::tasky
 	{
 		struct Executor
 		{
-		public:
-			static inline Executor create() { return Executor(); }
 		private:
-			Executor() { printf("Executor() %zu\n", std::this_thread::get_id()); }
+			static std::vector<Executor*> executors_;
+
 		public:
+			static Executor& get()
+			{
+				static thread_local Executor instance = Executor();
+				return instance;
+			}
+
+		private:
+			Executor() noexcept { exectorIndex_ = executors_.size(); executors_.emplace_back(this); }
 			Executor(const Executor&) = delete;
 			Executor(Executor&&) = delete;
-			~Executor() noexcept { printf("~Executor() %zu\n", std::this_thread::get_id()); }
+			~Executor() noexcept { std::erase(executors_, this); }
+
+			bool stealTask(TaskPtr& task);
 
 		public:
 			bool runNext();
@@ -38,19 +47,28 @@ namespace ion::tasky
 			}
 
 		private:
+			std::size_t exectorIndex_;
+			std::size_t stealIndex_;
 			TaskQueue queue_;
 		};
 
-		static Executor& executor()
+		inline Executor& executor() noexcept
 		{
-			static thread_local Executor instance = Executor::create();
-			return instance;
+			return Executor::get();
 		}
 
 		template<typename... Tasks>
 		void schedule(Tasks&&... tasks)
 		{
 			executor().schedule(std::forward<Tasks>(tasks)...);
+		}
+
+		template<typename ScheduleCallback>
+		void scheduleMultiple(std::size_t count, ScheduleCallback callback)
+		{
+			auto& exec = executor();
+			for(std::size_t i = 0; i < count; i++)
+				exec.schedule(callback(i));
 		}
 
 		template<typename T>
@@ -106,7 +124,7 @@ namespace ion::tasky
 		{
 			std::vector<TaskPtr> taskPtrs;
 			for (IndexType i = 0; i < count; i++)
-				buildTasksList(taskPtrs, callback(i));
+				taskPtrs.emplace_back(callback(i).handle().address());
 			return TasksAwaiter(taskPtrs);
 		}
 	};
