@@ -34,7 +34,7 @@ namespace ion::engine
 			scenes_.emplace(std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(new T()));
 		}
 
-		inline Scene& registerScene(const Path& path)
+		inline Scene& registerScene([[maybe_unused]] const Path& path)
 		{
 			throw std::runtime_error("TODO: inline Scene& registerScene(const Path& path)!");
 		}

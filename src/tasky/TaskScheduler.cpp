@@ -39,11 +39,11 @@ namespace ion::tasky::scheduler
 					const std::size_t count = promise.tasksAwaiter_->tasks_.size() - 1;
 					if (count > 0)
 						queue_.addTaskCount(count);
-					for (TaskPtr ptr : promise.tasksAwaiter_->tasks_)
+					for (TaskPtr awaitPtr : promise.tasksAwaiter_->tasks_)
 					{
-						auto h = std::coroutine_handle<TaskPromiseBase>::from_address(ptr);
+						auto h = std::coroutine_handle<TaskPromiseBase>::from_address(awaitPtr);
 						h.promise().parentCoroutine_ = handle;
-						queue_.push(ptr);
+						queue_.push(awaitPtr);
 					}
 				}
 				else [[unlikely]]

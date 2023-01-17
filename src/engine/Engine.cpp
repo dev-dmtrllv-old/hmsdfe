@@ -23,8 +23,8 @@ namespace ion::engine
 		assert(game_ == nullptr && game != nullptr);
 		game_ = game;
 		
-		auto& rm = SubSystem<ResourceManager>::initialize();
-		auto& sm = SubSystem<SceneManager>::initialize();
+		[[maybe_unused]] auto& rm = SubSystem<ResourceManager>::initialize();
+		[[maybe_unused]] auto& sm = SubSystem<SceneManager>::initialize();
 	}
 
 	void Engine::onTerminate() noexcept

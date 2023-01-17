@@ -14,7 +14,7 @@ namespace ion::engine
 		scenes_.clear();
 	}
 
-	Task<> SceneManager::loadScene(const Path& path)
+	Task<> SceneManager::loadScene([[maybe_unused]] const Path& path)
 	{
 		throw std::runtime_error("TODO: Task<> SceneManager::loadScene(const Path& path)!");
 	}

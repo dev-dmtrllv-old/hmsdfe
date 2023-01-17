@@ -11,10 +11,13 @@ namespace ion::utils
 		constexpr Hash hashString(const char* str)
 		{
 			Hash hash = 5381;
-			int c;
+			int c = *str;
 
-			while ((c = *str++))
+			while (c)
+			{
 				hash = ((hash << 5) + hash) * 33 + c;
+				c = *str++;
+			}
 
 			return hash;
 		}

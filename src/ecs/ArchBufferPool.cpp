@@ -44,7 +44,7 @@ namespace ion::ecs
 		return Entity(bufferIndex, index);
 	}
 
-	bool ArchBufferPool::free(const Entity& entity)
+	bool ArchBufferPool::free([[maybe_unused]] const Entity& entity)
 	{
 		// TODO
 		return true;

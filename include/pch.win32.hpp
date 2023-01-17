@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <shellapi.h>
 #include <dwmapi.h>
+#include <tlhelp32.h>
+#include <Psapi.h>
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20

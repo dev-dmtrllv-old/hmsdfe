@@ -69,9 +69,9 @@ namespace ion::ecs
 		return nextArch.arch;
 	}
 
-	void* Arch::getComponentRaw(const Entity& entity, std::size_t bitmask) const
+	void* Arch::getComponentRaw(const Entity& entity, std::size_t componentBitmask) const
 	{
-		return bufferPool_.getRaw(entity) + getComponentOffset(bitmask).offset;
+		return bufferPool_.getRaw(entity) + getComponentOffset(componentBitmask).offset;
 	}
 
 	const ComponentOffset& Arch::getComponentOffset(const ComponentInfo& component) const
@@ -79,11 +79,11 @@ namespace ion::ecs
 		return getComponentOffset(component.bitmask);
 	}
 
-	const ComponentOffset& Arch::getComponentOffset(std::size_t bitmask) const
+	const ComponentOffset& Arch::getComponentOffset(std::size_t componentBitmask) const
 	{
 		for (std::size_t i = 0, l = offsets_.size(); i < l; i++)
 		{
-			if (components_[i]->bitmask == bitmask)
+			if (components_[i]->bitmask == componentBitmask)
 			{
 				return offsets_[i];
 			}
@@ -108,7 +108,7 @@ namespace ion::ecs
 		return *next_.emplace_back(new ArchArm(newArch, component.bitmask, offset.offset, component.size));
 	}
 
-	const ArchArm& Arch::getPrev(const ComponentInfo& component)
+	const ArchArm& Arch::getPrev([[maybe_unused]] const ComponentInfo& component)
 	{
 		// TODO:
 		throw "!!! TODO !!!";

@@ -1,6 +1,6 @@
 {
 	"cmake.debugConfig": {
-		"args": []
+		"args": ["test"]
 	},
 	"C_Cpp.default.configurationProvider": "",
 	"files.associations": {
@@ -84,6 +84,7 @@
 		"xstring": "cpp",
 		"xtr1common": "cpp",
 		"xtree": "cpp",
-		"xutility": "cpp"
+		"xutility": "cpp",
+		"functional": "cpp"
 	}
 }
