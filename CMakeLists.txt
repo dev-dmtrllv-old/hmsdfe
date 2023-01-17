@@ -14,11 +14,12 @@ function(app NAME)
 	endforeach()
 
 	add_executable (${NAME} ${${NAME}_SOURCES})
-	target_precompile_headers(${NAME} PUBLIC include/${NAME}/pch.hpp)
+	target_precompile_headers(${NAME} PUBLIC include/pch.hpp)
 	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 23)
 	include_directories(${NAME} include)
 endfunction()
 
+app(launcher)
 app(test-game tasky ecs engine)
 
 app(perf-tests tasky)
