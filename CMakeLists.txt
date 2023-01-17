@@ -32,5 +32,5 @@ else()
 endif()
 
 app(launcher false utils)
-app(test-game true tasky ecs engine utils)
+app(test-game true tasky ecs engine utils async win)
 app(perf-tests tasky ecs engine utils)

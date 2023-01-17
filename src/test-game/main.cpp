@@ -8,6 +8,10 @@
 
 #include "test-game/Launcher.hpp"
 
+#include "async/file.hpp"
+#include "async/Worker.hpp"
+#include "win/wrapper.hpp"
+
 class Game: public ion::engine::Game
 {
 public:
@@ -37,13 +41,37 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
 	using namespace ion::engine;
 	using namespace ion::test_game;
 
-	Launcher::get().send();
+	try
+	{
+		ion::async::Worker& worker = ion::async::Worker::get();
 
-	const Engine& engine = Engine::initialize<::Game>();
+		// [[maybe_unused]] auto file = ion::async::File("D:\\test.txt");
+		// file.read();
 
-	engine.run();
+		worker.postWork([](void*)
+		{
+			MessageBoxA(NULL, "working", "working", MB_OK);
+		}, [](void*)
+		{
+			MessageBoxA(NULL, "done", "done", MB_OK);
+		});
 
-	Engine::terminate();
+		MessageBoxA(NULL, "wait", "wait", MB_OK);
+		worker.stop();
+	}
+	catch(const std::runtime_error& e)
+	{
+		MessageBoxA(NULL, e.what(), e.what(), MB_OK);
+	}	
+
+	// Launcher::get().send();
+
+	// const Engine& engine = Engine::initialize<::Game>();
+
+	// engine.run();
+
+	// Engine::terminate();
+
 
 
 	return 0;
