@@ -5,6 +5,7 @@
 #include "engine/Game.hpp"
 
 #include "utils/String.hpp"
+#include "utils/Pointer.hpp"
 
 #include "test-game/Launcher.hpp"
 
@@ -33,46 +34,35 @@ public:
 	}
 };
 
-
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
 {
-	using namespace ion::engine;
-	using namespace ion::test_game;
+	using namespace ion::utils::pointer;
 
 	try
 	{
-		ion::async::Worker& worker = ion::async::Worker::get();
+		alignas(0x8) int value = 0;
+		int result = 0;
 
-		// [[maybe_unused]] auto file = ion::async::File("D:\\test.txt");
-		// file.read();
-
-		worker.postWork([](void*)
 		{
-			MessageBoxA(NULL, "working", "working", MB_OK);
-		}, [](void*)
-		{
-			MessageBoxA(NULL, "done", "done", MB_OK);
-		});
+			TaggedPtr<int> taggedInt(&value, { 1, 1, 1 });
 
-		MessageBoxA(NULL, "wait", "wait", MB_OK);
-		worker.stop();
+			*taggedInt = 200;
+			taggedInt.setTag({ 1, 0, 1 });
+
+			const int i = *taggedInt;
+			const Tag tag = taggedInt.tag();
+
+			result = i + tagToByte(tag);
+		}
+
+		return result; // 205
 	}
-	catch(const std::runtime_error& e)
+	catch (const std::runtime_error& e)
 	{
 		MessageBoxA(NULL, e.what(), e.what(), MB_OK);
-	}	
-
-	// Launcher::get().send();
-
-	// const Engine& engine = Engine::initialize<::Game>();
-
-	// engine.run();
-
-	// Engine::terminate();
-
-
+	}
 
 	return 0;
 }
