@@ -4,19 +4,19 @@
 
 namespace ion::utils::pointer
 {
-	struct Tag
-	{
-		unsigned int a : 1 = 0;
-		unsigned int b : 1 = 0;
-		unsigned int c : 1 = 0;
-		unsigned int : 1;
-	};
-
 	template<typename T>
 	class TaggedPtr
 	{
 	public:
 		using ptr_t = std::uintptr_t;
+
+		struct Tag
+		{
+			unsigned int a : 1 = 0;
+			unsigned int b : 1 = 0;
+			unsigned int c : 1 = 0;
+			unsigned int : 1;
+		};
 
 	private:
 		static inline const ptr_t ZERO_MASK = 0b000ULL;
@@ -40,13 +40,13 @@ namespace ion::utils::pointer
 			assert(ptr_ != nullptr);
 		}
 
-private:
+	private:
 		T* clean() const noexcept
 		{
 			return reinterpret_cast<T*>(ptr_ & CLEAR_MASK);
 		}
 
-public:
+	public:
 		T* operator->() const noexcept
 		{
 			return clean();
@@ -73,7 +73,7 @@ public:
 		{
 			std::uint8_t bits = static_cast<std::uint8_t>(ptr_ & TAG_MASK);
 
-			return Tag { 
+			return Tag{
 				.a = bits & 0b001ULL,
 				.b = bits & 0b001ULL,
 				.c = bits & 0b001ULL,

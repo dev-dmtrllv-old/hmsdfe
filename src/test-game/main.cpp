@@ -38,26 +38,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
 {
-	using namespace ion::utils::pointer;
-
 	try
 	{
-		alignas(0x8) int value = 0;
-		int result = 0;
-
-		{
-			TaggedPtr<int> taggedInt(&value, { 1, 1, 1 });
-
-			*taggedInt = 200;
-			taggedInt.setTag({ 1, 0, 1 });
-
-			const int i = *taggedInt;
-			const Tag tag = taggedInt.tag();
-
-			result = i + taggedInt.tagAsByte();
-		}
-
-		return result; // 205
+		
 	}
 	catch (const std::runtime_error& e)
 	{
