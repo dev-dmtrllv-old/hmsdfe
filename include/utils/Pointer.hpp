@@ -12,32 +12,6 @@ namespace ion::utils::pointer
 		unsigned int : 1;
 	};
 
-	union ByteTag
-	{
-		Tag tag;
-		std::uint8_t byte;
-
-		ByteTag(Tag tag) noexcept:
-			tag(tag)
-		{ }
-
-		ByteTag(std::uint8_t byte) noexcept:
-			byte(byte)
-		{ }
-	};
-
-	std::uint8_t tagToByte(const Tag tag) noexcept
-	{
-		const ByteTag converter(tag);
-		return converter.byte;
-	}
-
-	Tag byteToTag(const std::uint8_t byte) noexcept
-	{
-		const ByteTag converter(byte);
-		return converter.tag;
-	}
-
 	template<typename T>
 	class TaggedPtr
 	{
@@ -45,21 +19,16 @@ namespace ion::utils::pointer
 		using ptr_t = std::uintptr_t;
 
 	private:
-		static inline const ptr_t ZERO_TAG = tagToByte({ 0, 0, 0 });
-		static inline const ptr_t TAG_MASK = tagToByte({ 1, 1, 1 });
-		static inline const ptr_t CLEAR_MASK = ~TAG_MASK;
+		static inline const ptr_t ZERO_MASK = 0b000ULL;
+		static inline const ptr_t TAG_MASK = 0b111ULL;
+		static inline const ptr_t CLEAR_MASK = ~0b111ULL;
 
 	public:
-		// template<typename... Args>
-		// static TaggedPtr alloc(Tag tag = ZERO_TAG, Args... args)
-		// {
-		// 	return TaggedPtr(new T(std::forward<Args>(args)...), tag);
-		// }
-
-		TaggedPtr(T* ptr, Tag tag = ZERO_TAG) noexcept:
-			ptr_(reinterpret_cast<ptr_t>(ptr) | tagToByte(tag))
+		TaggedPtr(T* ptr, Tag tag) noexcept:
+			ptr_(reinterpret_cast<ptr_t>(ptr))
 		{
 			assert(ptr != nullptr);
+			setTag(tag);
 		}
 
 		TaggedPtr(const TaggedPtr& ptr) = delete;
@@ -71,11 +40,13 @@ namespace ion::utils::pointer
 			assert(ptr_ != nullptr);
 		}
 
+private:
 		T* clean() const noexcept
 		{
 			return reinterpret_cast<T*>(ptr_ & CLEAR_MASK);
 		}
 
+public:
 		T* operator->() const noexcept
 		{
 			return clean();
@@ -93,14 +64,35 @@ namespace ion::utils::pointer
 			return val;
 		}
 
+		std::uint8_t tagAsByte() const noexcept
+		{
+			return static_cast<std::uint8_t>(ptr_ & TAG_MASK);
+		}
+
 		Tag tag() const noexcept
 		{
-			return byteToTag(static_cast<std::uint8_t>(ptr_ & TAG_MASK));
+			std::uint8_t bits = static_cast<std::uint8_t>(ptr_ & TAG_MASK);
+
+			return Tag { 
+				.a = bits & 0b001ULL,
+				.b = bits & 0b001ULL,
+				.c = bits & 0b001ULL,
+			};
 		}
 
 		void setTag(Tag tag) noexcept
 		{
-			ptr_ = (ptr_ & CLEAR_MASK) | tagToByte(tag);
+			std::uint8_t bits = 0;
+			bits |= (tag.a & 0b001ULL) << 0;
+			bits |= (tag.b & 0b001ULL) << 1;
+			bits |= (tag.c & 0b001ULL) << 2;
+			setTag(bits);
+		}
+
+		void setTag(std::uint8_t bits) noexcept
+		{
+			assert(bits < 8);
+			ptr_ = (ptr_ & CLEAR_MASK) | bits;
 		}
 
 	private:

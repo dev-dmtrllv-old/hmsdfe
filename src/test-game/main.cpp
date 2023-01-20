@@ -54,7 +54,7 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
 			const int i = *taggedInt;
 			const Tag tag = taggedInt.tag();
 
-			result = i + tagToByte(tag);
+			result = i + taggedInt.tagAsByte();
 		}
 
 		return result; // 205
