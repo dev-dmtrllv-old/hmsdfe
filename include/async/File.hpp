@@ -1,35 +1,30 @@
 #pragma once
 
 #include "pch.hpp"
-#include "win/wrapper.hpp"
+#include "tasky/task.hpp"
 
 namespace ion::async
 {
-	class File
-	{
-	private:
-		static inline HANDLE mainPortHandle()
-		{
-			static HANDLE handle = win::createIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-			return handle;
-		}
+	tasky::Task<std::string> readFile(std::string_view path);
 
-	public:
-		File(const std::string& path);
-		File(const File&) = delete;
-		File(File&&) = delete;
-		~File();
+	// class File
+	// {
+	// public:
+	// 	File(const std::string& path);
+	// 	File(const File&) = delete;
+	// 	File(File&&) = delete;
+	// 	~File();
 
-		void read();
+	// 	void read();
 
-		const std::string path;
+	// 	const std::string path;
 
-	private:
-		HANDLE fileHandle_;
-		HANDLE ioPort_;
-		std::string buffer_;
+	// private:
+	// 	HANDLE fileHandle_;
+	// 	HANDLE ioPort_;
+	// 	std::string buffer_;
 
-	};
+	// };
 	/*
 	int _tmain(int argc, _TCHAR* argv[])
 {

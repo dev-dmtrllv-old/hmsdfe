@@ -2,10 +2,12 @@
 #include "engine/ResourceManager.hpp"
 #include "engine/SceneManager.hpp"
 #include "engine/Game.hpp"
+#include "tasky/TaskScheduler.hpp"
 
 namespace ion::engine
 {
 	Engine::Engine():
+		worker_(MainWorker(*this)),
 		isInitialized_(false)
 	{
 		puts("Engine()");
@@ -19,10 +21,10 @@ namespace ion::engine
 	void Engine::onInitialize(Game* game) noexcept
 	{
 		puts("Engine::onInitialize()");
-		
+
 		assert(game_ == nullptr && game != nullptr);
 		game_ = game;
-		
+
 		[[maybe_unused]] auto& rm = SubSystem<ResourceManager>::initialize();
 		[[maybe_unused]] auto& sm = SubSystem<SceneManager>::initialize();
 	}
@@ -38,5 +40,7 @@ namespace ion::engine
 	void Engine::run() const
 	{
 		game().onLoad();
+		isRunning_ = true;
+		worker_.enterEventLoop();
 	}
 }

@@ -20,11 +20,11 @@ namespace ion::tasky::scheduler
 		return false;
 	}
 
-	bool Executor::runNext()
+	bool Executor::runNext(bool steal)
 	{
 		TaskPtr ptr = queue_.pop();
 
-		if (ptr == nullptr && !stealTask(ptr))
+		if (ptr == nullptr && (!steal || !stealTask(ptr)))
 			return false;
 
 		if (ptr != nullptr)

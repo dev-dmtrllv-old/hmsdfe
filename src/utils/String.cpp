@@ -2,31 +2,21 @@
 
 namespace ion::utils
 {
-	const std::wstring toWString(const char* str)
+	const std::wstring toWString(std::string_view str)
 	{
-		std::size_t length = strlen(str) + 1;
+		const std::size_t length = str.length() + 1;
 		std::wstring wcString(length, L'\0');
 		std::size_t numOfConverted = 0;
-		mbstowcs_s(&numOfConverted, &wcString[0], length, str, length);
+		mbstowcs_s(&numOfConverted, &wcString[0], length, str.data(), length);
 		return wcString;
 	}
 
-	const std::wstring toWString(const std::string& str)
+	const std::string toString(std::wstring_view str)
 	{
-		return toWString(str.c_str());
-	}
-
-	const std::string toString(const wchar_t* str)
-	{
-		std::size_t length = wcslen(str) + 1;
+		std::size_t length = str.length() + 1;
 		std::string string(length, '\0');
 		std::size_t numOfConverted = 0;
-		wcstombs_s(&numOfConverted, &string[0], length, str, length);
+		wcstombs_s(&numOfConverted, &string[0], length, str.data(), length);
 		return string;
-	}
-
-	const std::string toString(const std::wstring& str)
-	{
-		return toString(str.c_str());
 	}
 }

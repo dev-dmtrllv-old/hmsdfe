@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.hpp"
+#include "engine/MainWorker.hpp"
 
 namespace ion::engine
 {
@@ -50,9 +51,12 @@ namespace ion::engine
 	public:
 		void run() const;
 		inline Game& game() const noexcept { assert(game_ != nullptr); return *game_; }
+		inline bool isRunning() const noexcept { return isRunning_.load(std::memory_order::acquire); }
 
 	private:
+		MainWorker worker_;
 		Game* game_;
 		bool isInitialized_;
+		mutable std::atomic<bool> isRunning_;
 	};
 }

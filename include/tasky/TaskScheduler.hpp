@@ -31,7 +31,7 @@ namespace ion::tasky
 			bool stealTask(TaskPtr& task);
 
 		public:
-			bool runNext();
+			bool runNext(bool steal = true);
 
 			template<typename T>
 			void schedule(Task<T> task)

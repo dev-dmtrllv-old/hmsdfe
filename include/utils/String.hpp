@@ -4,9 +4,7 @@
 
 namespace ion::utils
 {
-	const std::wstring toWString(const char* str);
-	const std::wstring toWString(const std::string& str);
+	const std::wstring toWString(std::string_view str);
 
-	const std::string toString(const wchar_t* str);
-	const std::string toString(const std::wstring& str);
+	const std::string toString(std::wstring_view str);
 }

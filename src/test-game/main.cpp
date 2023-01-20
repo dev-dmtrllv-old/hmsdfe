@@ -11,7 +11,6 @@
 
 #include "async/file.hpp"
 #include "async/Worker.hpp"
-#include "win/wrapper.hpp"
 
 class Game: public ion::engine::Game
 {
@@ -40,7 +39,13 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
 {
 	try
 	{
-		
+		using namespace ion::engine;
+
+		const Engine& engine = Engine::initialize<::Game>();
+
+		engine.run();
+
+		Engine::terminate();
 	}
 	catch (const std::runtime_error& e)
 	{
