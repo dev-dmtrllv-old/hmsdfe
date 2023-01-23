@@ -11,6 +11,7 @@
 
 #include "async/file.hpp"
 #include "async/Worker.hpp"
+#include "launcher/SharedMemory.hpp"
 
 class Game: public ion::engine::Game
 {
@@ -37,20 +38,36 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
 {
+	using namespace ion::launcher;
+
 	try
 	{
-		using namespace ion::engine;
+		SharedMemory::Writer& writer = SharedMemory::Writer::get(L"TEST 1 2 3");
 
-		const Engine& engine = Engine::initialize<::Game>();
-
-		engine.run();
-
-		Engine::terminate();
+		writer.write("test 1 2 3");
 	}
-	catch (const std::runtime_error& e)
+	catch (const std::runtime_error& err)
 	{
-		MessageBoxA(NULL, e.what(), e.what(), MB_OK);
+		MessageBoxA(NULL, err.what(), err.what(), MB_OK);
 	}
 
 	return 0;
+
+
+	// try
+	// {
+	// 	using namespace ion::engine;
+
+	// 	const Engine& engine = Engine::initialize<::Game>();
+
+	// 	engine.run();
+
+	// 	Engine::terminate();
+	// }
+	// catch (const std::runtime_error& e)
+	// {
+	// 	MessageBoxA(NULL, e.what(), e.what(), MB_OK);
+	// }
+
+	// return 0;
 }

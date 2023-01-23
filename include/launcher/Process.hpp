@@ -2,97 +2,72 @@
 
 #include "pch.hpp"
 #include "utils/String.hpp"
+#include "win/error.hpp"
+#include "launcher/SharedMemory.hpp"
 
 namespace ion::launcher
 {
+	[[noreturn]] void throwError(std::string_view str)
+	{
+		throw std::runtime_error(str.data());
+	}
+
 	class Process
 	{
+	private:
+		static SECURITY_ATTRIBUTES createSecurityAttributes()
+		{
+			return {
+				.nLength = sizeof(SECURITY_ATTRIBUTES),
+				.lpSecurityDescriptor = NULL,
+				.bInheritHandle = true
+			};
+		}
+
 	public:
-		static inline LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-		{
-			switch (msg)
-			{
-				case WM_USER:
-					puts("got WM_USER msg!");
-					break;
-			}
-			return DefWindowProc(hwnd, msg, wParam, lParam);
-		}
-
-		static inline std::string getLastErrorAsString()
-		{
-			std::uint32_t errorMessageID = ::GetLastError();
-
-			if (errorMessageID == 0)
-				return std::string();
-
-			LPSTR messageBuffer = nullptr;
-			std::uint32_t flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
-			size_t size = FormatMessageA(flags, NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-			std::string message(messageBuffer, size);
-			LocalFree(messageBuffer);
-			return message;
-		}
-
 		Process(std::string&& application):
-			wc_(),
-			application_(std::move(application))
+			application_(std::move(application)),
+			securityAttr_(createSecurityAttributes()),
+			sharedMem_(&securityAttr_, L"TEST 1 2 3")
 		{
-			wc_.style = 0;
-			wc_.lpfnWndProc = (WNDPROC)WindowProc;
-			wc_.cbClsExtra = 0;
-			wc_.cbWndExtra = 0;
-			wc_.hInstance = GetModuleHandle(NULL);
-			wc_.lpszMenuName = L"MainMenu";
-			wc_.lpszClassName = L"MainWndClass";
+			std::wstring args = L"";
+			
+			ZeroMemory(&procInfo_, sizeof(PROCESS_INFORMATION));
 
-			RegisterClass(&wc_);
+			STARTUPINFO siStartInfo_;
+			ZeroMemory(&siStartInfo_, sizeof(STARTUPINFO));
+			siStartInfo_.cb = sizeof(STARTUPINFO);
+			siStartInfo_.dwFlags |= STARTF_USESTDHANDLES;
+			
+			const std::wstring exe = utils::toWString(application_);
 
-			ZeroMemory(&si_, sizeof(STARTUPINFO));
-			ZeroMemory(&pi_, sizeof(PROCESS_INFORMATION));
-
-			const auto appName = utils::toWString(application_.c_str());
-			std::wstring commandLine = L"";
-			const uint32_t creationFlags = 0;
-
-			printf("Creating sub process %s\n", application_.c_str());
-
-			if (!CreateProcess(appName.c_str(), commandLine.data(), NULL, NULL, FALSE, creationFlags, NULL, NULL, &si_, &pi_))
-			{
-				throw std::runtime_error(std::format("Could not create sub process!\n{}", getLastErrorAsString().c_str()));
-			}
-
-			BOOL ret;
-			MSG msg;
-
-			while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0)
-			{
-				if (ret == -1)
-				{
-					throw std::runtime_error("GetMessageError!");
-				}
-				else
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-			}
-
-			printf("sub process %s done!\n", application_.c_str());
+			if (!CreateProcess(exe.c_str(), args.data(), NULL, NULL, TRUE, 0, NULL, NULL, &siStartInfo_, &procInfo_))
+				throwError("CreateProcess");
 		}
 
 		Process(const Process&) = delete;
 		Process(Process&&) = delete;
 		~Process()
 		{
-			CloseHandle(pi_.hProcess);
-			CloseHandle(pi_.hThread);
+			CloseHandle(procInfo_.hProcess);
+			CloseHandle(procInfo_.hThread);
 		}
 
+		bool exited() const noexcept { return exited_; }
+
+		HANDLE handle() const noexcept { return procInfo_.hProcess; }
+		HANDLE processHandle() const noexcept { return procInfo_.hProcess; }
+
+		void read() { sharedMem_.read(); }
+
 	private:
-		WNDCLASS wc_;
 		const std::string application_;
-		STARTUPINFO si_;
-		PROCESS_INFORMATION pi_;
+		SECURITY_ATTRIBUTES securityAttr_;
+		PROCESS_INFORMATION procInfo_;
+
+		SharedMemory sharedMem_;
+		
+		bool exited_ = false;
+
 	};
 }

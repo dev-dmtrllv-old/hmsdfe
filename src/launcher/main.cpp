@@ -8,6 +8,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv)
 	try
 	{
 		Process gameProcess("test-game.exe");
+		gameProcess.read();
+
 	}
 	catch (const std::runtime_error& e)
 	{

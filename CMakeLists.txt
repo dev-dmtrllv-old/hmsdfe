@@ -31,6 +31,6 @@ else()
 	add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-app(launcher false utils)
+app(launcher false utils win)
 app(test-game true tasky ecs engine utils async win)
 app(perf-tests tasky ecs engine utils)
